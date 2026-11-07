@@ -26,6 +26,8 @@ Run `typecheck`, `lint` and `test` before declaring any task done.
 
 ## Structure
 
+Landing page lives at `/` (`index.html`, `landing/`), outside `src/`; the app is served from `/app/` (`app/index.html`).
+
 ```
 src/
   lib/            # PURE logic, no React, no Dexie
@@ -62,10 +64,9 @@ src/
 
 ## Known gaps / next steps (not yet built)
 
-- No separate marketing/landing page or install instructions page (reknit and trove both have one — Parichay doesn't yet).
 - No proper PWA icon set beyond the generated placeholder (`scripts/icon-512*.svg` — simple two-circle mark, fine for now, worth a real pass later).
 - No automated test coverage for the Dexie hooks or the camera/scan loop (hard to test meaningfully without a real camera); `src/lib/` is the fully-tested part.
-- Not yet deployed anywhere.
+- Deployed on Vercel (project `parichay`, GitHub `jagdeepvirdi/parichay`); custom domain `parichay.jagdeepsinghvirdi.com` pending DNS. Not yet tested on a real phone.
 
 ## Definition of done
 

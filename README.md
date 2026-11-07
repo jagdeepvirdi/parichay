@@ -29,4 +29,4 @@ Pure logic (vCard building/parsing, share presets) lives in `src/lib/` and is co
 
 ## Deploy
 
-Static site; any static host works. `vercel.json` rewrites everything to `index.html` for client-side routing.
+Static site on Vercel (`parichay.jagdeepsinghvirdi.com`). Two entry points: the landing page at `/` (`index.html` + `landing/landing.css`) and the app at `/app/` (`app/index.html`, router `basename="/app"`). `vercel.json` rewrites `/app/*` to `app/index.html` for client-side routing; the PWA manifest and service worker are scoped to `/app/`.
