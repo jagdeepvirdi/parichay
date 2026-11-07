@@ -64,7 +64,6 @@ src/
 
 ## Known gaps / next steps (not yet built)
 
-- No proper PWA icon set beyond the generated placeholder (`scripts/icon-512*.svg` — simple two-circle mark, fine for now, worth a real pass later).
 - No automated test coverage for the Dexie hooks or the camera/scan loop (hard to test meaningfully without a real camera); `src/lib/` is the fully-tested part.
 - Deployed on Vercel (project `parichay`, GitHub `jagdeepvirdi/parichay`); custom domain `parichay.jagdeepsinghvirdi.com` (CNAME at GoDaddy). Production branch is `main`. Not yet tested on a real phone.
 
