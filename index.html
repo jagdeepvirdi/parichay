@@ -2,28 +2,206 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#2e6f64" />
-    <meta name="description" content="Share only what you choose, phone to phone, with no server in between." />
-
-    <!-- iOS home-screen app behaviour -->
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Parichay" />
-    <link rel="apple-touch-icon" href="/icon-192.png" />
-
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap"
+    <title>Parichay — Swap contacts phone to phone, no account needed</title>
+    <meta
+      name="description"
+      content="Parichay is a free contact-exchange app. Build your card once, show a QR code, and let someone scan it. No server, no sign-up, and it works in airplane mode."
     />
-
-    <title>Parichay — Contact Exchange</title>
+    <meta property="og:title" content="Parichay — Contact exchange without the middleman" />
+    <meta
+      property="og:description"
+      content="Share only the details you choose, phone to phone, with no account and no server in between."
+    />
+    <meta property="og:type" content="website" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <link rel="stylesheet" href="/landing/landing.css" />
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <div class="wrap">
+      <header class="top">
+        <a class="brand" href="/"><img src="/favicon.svg" alt="" />Parichay</a>
+        <nav aria-label="Primary">
+          <a href="#how">How it works</a>
+          <a href="#privacy">Privacy</a>
+          <a href="#install">Install</a>
+          <a class="btn small" href="/app/">Open the app</a>
+        </nav>
+      </header>
+
+      <main>
+        <div class="hero">
+          <div>
+            <p class="eyebrow">Contact exchange · No account</p>
+            <h1>Swap contacts in a <em>scan</em>, not a signup.</h1>
+            <p class="lede">
+              Build your card once. Pick what to share for this person. Show a QR code, they scan it, and it's
+              saved into a group on their phone. Nothing goes through a server, so it works with zero signal.
+            </p>
+            <div class="cta">
+              <a class="btn" href="/app/">Open the app</a>
+              <a class="btn ghost" href="#install">Add to home screen</a>
+            </div>
+            <p class="fine">Free. Runs in your browser. Nothing to download from a store.</p>
+          </div>
+
+          <div class="card-demo" aria-hidden="true">
+            <div class="who">
+              <div class="avatar">AK</div>
+              <div><strong>Asha Kapoor</strong><span>Product designer</span></div>
+            </div>
+            <dl style="margin: 0">
+              <div class="field"><dt>Email</dt><dd>asha@studio.in</dd></div>
+              <div class="field"><dt>LinkedIn</dt><dd>/in/ashak</dd></div>
+              <div class="field off"><dt>Mobile</dt><dd>+91 98••• ••210</dd></div>
+            </dl>
+            <div class="chips">
+              <span class="chip on">Professional</span>
+              <span class="chip">Personal</span>
+              <span class="chip">Everything</span>
+              <span class="chip">Digital only</span>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <section class="alt" id="how">
+      <div class="wrap">
+        <h2>Three taps to a new contact</h2>
+        <p class="sub">No pairing, no Bluetooth dance, no “what's your number again?”</p>
+        <ol class="steps">
+          <li>
+            <h3>Build your card</h3>
+            <p>Add your details once, split into Professional and Personal. It's stored on your phone only.</p>
+          </li>
+          <li>
+            <h3>Choose what to share</h3>
+            <p>Pick a preset for this person. Your QR code carries only those fields, nothing extra.</p>
+          </li>
+          <li>
+            <h3>Scan, sort, save</h3>
+            <p>
+              They scan your code with their camera, drop you into a group like “AI CEO Course”, add a note,
+              and keep you.
+            </p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="features">
+      <div class="wrap">
+        <h2>Share exactly what you mean to</h2>
+        <p class="sub">
+          Four presets cover the usual cases. A single “include phone numbers” switch overrides all of them,
+          even Everything.
+        </p>
+        <div class="presets">
+          <div class="preset"><b>Professional</b><span>Work details only.</span></div>
+          <div class="preset"><b>Personal</b><span>The friendly stuff.</span></div>
+          <div class="preset"><b>Everything</b><span>The full card.</span></div>
+          <div class="preset"><b>Digital only</b><span>Email and social links, no phone numbers.</span></div>
+        </div>
+        <div class="grid" style="margin-top: 20px">
+          <div>
+            <h3>Your network, organised</h3>
+            <p>Group the people you meet by event, team or topic, search them later, and keep a note on each.</p>
+          </div>
+          <div>
+            <h3>Save to your phone's contacts</h3>
+            <p>
+              Any contact exports as a standard <code>.vcf</code> file. Your phone's own “Add to Contacts” sheet
+              finishes the job, and you stay in control of it.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="alt" id="privacy">
+      <div class="wrap">
+        <h2>No server. Really.</h2>
+        <p class="sub">That's the whole point, so here is exactly what it means.</p>
+        <div class="grid">
+          <div>
+            <h3>No account</h3>
+            <p>There's nothing to sign up for and nobody to log in as. Open it and go.</p>
+          </div>
+          <div>
+            <h3>Works offline</h3>
+            <p>The QR code is drawn and read on your phone. Both of you can be in airplane mode.</p>
+          </div>
+          <div>
+            <h3>Stays on your device</h3>
+            <p>Your card and the people you collect live in your browser's storage. They are never uploaded.</p>
+          </div>
+          <div>
+            <h3>No tracking</h3>
+            <p>No analytics, no ads, and no network calls from the app itself.</p>
+          </div>
+        </div>
+        <div class="honest">
+          <p>
+            <strong>The trade-off:</strong> because nothing is synced, your data lives only on that one phone's
+            browser. Clearing site data or switching phones means starting fresh, so export contacts you care
+            about to your phone's address book.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="install">
+      <div class="wrap">
+        <h2>Put it on your home screen</h2>
+        <p class="sub">
+          Parichay is a web app, so there's no app store. Open it once while you're online, add it to your home
+          screen, and it launches like any other app.
+        </p>
+        <div class="install">
+          <div>
+            <h3>iPhone (Safari)</h3>
+            <ol>
+              <li>Open <a href="/app/">parichay.jagdeepsinghvirdi.com/app</a> in <strong>Safari</strong>.</li>
+              <li>Tap the <strong>Share</strong> button.</li>
+              <li>Choose <strong>Add to Home Screen</strong>, then <strong>Add</strong>.</li>
+            </ol>
+          </div>
+          <div>
+            <h3>Android (Chrome)</h3>
+            <ol>
+              <li>Open <a href="/app/">parichay.jagdeepsinghvirdi.com/app</a> in <strong>Chrome</strong>.</li>
+              <li>Tap the <strong>⋮</strong> menu.</li>
+              <li>Choose <strong>Install app</strong> (or <strong>Add to Home screen</strong>).</li>
+            </ol>
+          </div>
+        </div>
+        <div class="honest">
+          <p>
+            <strong>Camera access:</strong> to scan someone's card, Parichay asks for your camera. The video is
+            processed on your phone and never recorded or sent anywhere.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="final">
+      <div class="wrap">
+        <h2>Meet someone. Scan. Done.</h2>
+        <p>Build your card in a minute and you're ready for the next introduction.</p>
+        <a class="btn" href="/app/">Open Parichay</a>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        <span>Parichay · made by Jagdeep Virdi</span>
+        <span>
+          <a href="https://github.com/jagdeepvirdi/parichay">Source on GitHub</a>
+        </span>
+      </div>
+    </footer>
   </body>
 </html>

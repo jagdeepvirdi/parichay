@@ -1,3 +1,4 @@
+import { resolve } from 'node:path'
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
@@ -10,6 +11,8 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      // The app lives under /app/; the landing page at / must not be controlled by the service worker.
+      scope: '/app/',
       includeAssets: ['favicon.svg'],
       manifest: {
         name: 'Parichay — Contact Exchange',
@@ -18,7 +21,9 @@ export default defineConfig({
         theme_color: '#2e6f64',
         background_color: '#eef0ec',
         display: 'standalone',
-        start_url: '/',
+        id: '/app/',
+        scope: '/app/',
+        start_url: '/app/',
         icons: [
           { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: '/icon-512.png', sizes: '512x512', type: 'image/png' },
@@ -26,10 +31,21 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff,woff2}'],
+        globIgnores: ['index.html'],
+        navigateFallback: '/app/index.html',
+        navigateFallbackAllowlist: [/^\/app\//],
       },
     }),
   ],
+  build: {
+    rollupOptions: {
+      input: {
+        landing: resolve(__dirname, 'index.html'),
+        app: resolve(__dirname, 'app/index.html'),
+      },
+    },
+  },
   test: {
     environment: 'jsdom',
     globals: true,

@@ -12,7 +12,7 @@ const ScanScreen = lazy(() => import('./features/scan/ScanScreen').then((m) => (
 
 export function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/app">
       <Routes>
         <Route element={<AppShell />}>
           <Route path="/" element={<ProfileScreen />} />
