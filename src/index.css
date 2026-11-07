@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --color-bg: #eef0ec;
+  --color-surface: #ffffff;
+  --color-ink: #16231f;
+  --color-ink-dim: #5b6b63;
+  --color-accent: #2e6f64;
+  --color-accent-deep: #1c433c;
+  --color-accent-warm: #9a6a1f;
+  --color-accent-warm-deep: #6e4d16;
+  --color-line: rgba(22, 35, 31, 0.14);
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Respect the device's safe areas when the app runs standalone (installed PWA). */
+  #root {
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
+
+@layer utilities {
+  .shadow-card {
+    box-shadow:
+      0 1px 2px rgba(22, 35, 31, 0.04),
+      0 10px 26px -10px rgba(22, 35, 31, 0.16);
+  }
+  .shadow-btn {
+    box-shadow: 0 8px 20px -6px rgba(46, 111, 100, 0.42);
+  }
+}
