@@ -86,6 +86,12 @@ export function ContactDetailScreen() {
                 <span className="text-[14px] font-medium">{contact[f]}</span>
               </div>
             ))}
+            {(contact.extras ?? []).map((x) => (
+              <div key={x.id} className="flex flex-col gap-0.5 border-b border-line pb-2.5">
+                <span className="font-mono text-[10.5px] uppercase tracking-wider text-ink-dim">{x.label}</span>
+                <span className="text-[14px] font-medium break-words">{x.value}</span>
+              </div>
+            ))}
             <div className="flex flex-col gap-0.5">
               <span className="font-mono text-[10.5px] uppercase tracking-wider text-ink-dim">Met</span>
               <span className="text-[14px] font-medium">{formatMetAt(contact.metAt)}</span>

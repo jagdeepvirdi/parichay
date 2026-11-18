@@ -1,4 +1,4 @@
-import type { FieldKey } from './profileFields'
+import type { ExtraField, FieldKey } from './profileFields'
 
 export type PresetKey = 'professional' | 'personal' | 'everything' | 'digital'
 
@@ -6,6 +6,8 @@ export interface Preset {
   key: PresetKey
   label: string
   fields: FieldKey[]
+  /** Which user-added extras this preset carries. */
+  includesExtra: (extra: ExtraField) => boolean
 }
 
 // Mirrors the four presets from the design mockup. "digital" deliberately
@@ -16,11 +18,13 @@ export const SHARE_PRESETS: Preset[] = [
     key: 'professional',
     label: 'Professional',
     fields: ['title', 'company', 'workEmail', 'workPhone', 'linkedin'],
+    includesExtra: (e) => e.scope === 'work',
   },
   {
     key: 'personal',
     label: 'Personal',
     fields: ['personalPhone', 'personalEmail', 'instagram', 'twitter'],
+    includesExtra: (e) => e.scope === 'personal',
   },
   {
     key: 'everything',
@@ -36,11 +40,13 @@ export const SHARE_PRESETS: Preset[] = [
       'instagram',
       'twitter',
     ],
+    includesExtra: () => true,
   },
   {
     key: 'digital',
     label: 'Digital only',
     fields: ['title', 'company', 'workEmail', 'linkedin', 'instagram', 'twitter'],
+    includesExtra: (e) => e.kind !== 'phone',
   },
 ]
 

@@ -1,4 +1,4 @@
-import type { FieldKey, ProfileFields } from './profileFields'
+import { newExtra, type ExtraKind, type ExtraScope, type FieldKey, type ProfileFields } from './profileFields'
 
 // A tiny, deliberately narrow VCARD 3.0 reader/writer. It only knows about
 // the fields Parichay itself cares about, so it is not a general vCard
@@ -53,12 +53,42 @@ export function buildVCard(profile: ProfileFields, fields: FieldKey[], note?: st
   if (has('twitter')) {
     lines.push(`URL;TYPE=Twitter:${escapeText(normalizeUrl(profile.twitter!, 'x.com/'))}`)
   }
+  // Extras are not gated by `fields` — the caller decides which extras are
+  // shared by passing a profile whose `extras` already holds only those.
+  for (const extra of profile.extras ?? []) {
+    const value = extra.value.trim()
+    if (!value) continue
+    const work = extra.scope === 'work'
+    if (extra.kind === 'phone') {
+      lines.push(`TEL;TYPE=${work ? 'WORK,VOICE' : 'CELL'}:${escapeText(value)}`)
+    } else if (extra.kind === 'email') {
+      lines.push(`EMAIL;TYPE=${work ? 'WORK' : 'HOME'}:${escapeText(value)}`)
+    } else {
+      const url = value.includes('.') || /^https?:\/\//i.test(value) ? normalizeUrl(value, '') : value
+      lines.push(`URL;TYPE=${typeFromLabel(extra.label)}:${escapeText(url)}`)
+    }
+  }
   if (note) {
     lines.push(`NOTE:${escapeText(note)}`)
   }
 
   lines.push('END:VCARD')
   return lines.join('\r\n')
+}
+
+// A URL's TYPE param carries the user's label ("My Blog" -> "My-Blog"), since
+// a TYPE value can't hold spaces or commas.
+function typeFromLabel(label: string): string {
+  const cleaned = label.trim().replace(/[^A-Za-z0-9 -]/g, '').replace(/\s+/g, '-')
+  return cleaned || 'Website'
+}
+
+const GENERIC_URL_TYPES = new Set(['WORK', 'HOME', 'PREF', 'INTERNET', 'OTHER'])
+
+function labelFromType(typeParam: string | undefined): string {
+  const first = typeParam?.slice(5).split(',')[0]?.trim() ?? ''
+  if (!first || GENERIC_URL_TYPES.has(first.toUpperCase())) return 'Website'
+  return first.replace(/-/g, ' ')
 }
 
 function normalizeUrl(handleOrUrl: string, prefix: string): string {
@@ -84,6 +114,9 @@ export function parseVCard(text: string): ParsedVCard | null {
   if (!lines.some((l) => l.toUpperCase() === 'BEGIN:VCARD')) return null
 
   const result: ParsedVCard = { name: '' }
+  const addExtra = (kind: ExtraKind, scope: ExtraScope, label: string | undefined, value: string) => {
+    result.extras = [...(result.extras ?? []), newExtra(kind, scope, label, value)]
+  }
 
   for (const line of lines) {
     const colonIndex = line.indexOf(':')
@@ -108,19 +141,27 @@ export function parseVCard(text: string): ParsedVCard | null {
       case 'TITLE':
         result.title = rawValue
         break
-      case 'TEL':
-        if (type.includes('CELL') || type.includes('HOME')) result.personalPhone = rawValue
-        else result.workPhone = rawValue
+      // The first value of each kind fills the fixed slot; any further ones
+      // (a second phone, a portfolio URL…) are kept as extras, not dropped.
+      case 'TEL': {
+        const personal = type.includes('CELL') || type.includes('HOME')
+        if (personal && !result.personalPhone) result.personalPhone = rawValue
+        else if (!personal && !result.workPhone) result.workPhone = rawValue
+        else addExtra('phone', personal ? 'personal' : 'work', undefined, rawValue)
         break
-      case 'EMAIL':
-        if (type.includes('HOME')) result.personalEmail = rawValue
-        else result.workEmail = rawValue
+      }
+      case 'EMAIL': {
+        const personal = type.includes('HOME')
+        if (personal && !result.personalEmail) result.personalEmail = rawValue
+        else if (!personal && !result.workEmail) result.workEmail = rawValue
+        else addExtra('email', personal ? 'personal' : 'work', undefined, rawValue)
         break
+      }
       case 'URL':
-        if (type.includes('LINKEDIN')) result.linkedin = rawValue
-        else if (type.includes('INSTAGRAM')) result.instagram = rawValue
-        else if (type.includes('TWITTER')) result.twitter = rawValue
-        else if (!result.linkedin) result.linkedin = rawValue
+        if (type.includes('LINKEDIN') && !result.linkedin) result.linkedin = rawValue
+        else if (type.includes('INSTAGRAM') && !result.instagram) result.instagram = rawValue
+        else if (type.includes('TWITTER') && !result.twitter) result.twitter = rawValue
+        else addExtra('link', 'work', labelFromType(typeParam), rawValue)
         break
       case 'NOTE':
         result.note = rawValue

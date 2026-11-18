@@ -57,6 +57,50 @@ describe('buildVCard', () => {
   })
 })
 
+describe('extras', () => {
+  const withExtras: ProfileFields = {
+    ...profile,
+    extras: [
+      { id: 'a', kind: 'link', scope: 'work', label: 'Portfolio', value: 'jagdeep.dev' },
+      { id: 'b', kind: 'link', scope: 'personal', label: 'My Blog', value: 'https://blog.example.com/jd' },
+      { id: 'c', kind: 'phone', scope: 'work', label: 'Phone', value: '+66 80 000 0000' },
+      { id: 'd', kind: 'email', scope: 'personal', label: 'Email', value: 'jd@example.com' },
+      { id: 'e', kind: 'link', scope: 'work', label: 'Empty', value: '   ' },
+    ],
+  }
+
+  it('writes extras to the vCard and skips blank ones', () => {
+    const vcard = buildVCard(withExtras, [])
+    expect(vcard).toContain('URL;TYPE=Portfolio:https://jagdeep.dev')
+    expect(vcard).toContain('URL;TYPE=My-Blog:https://blog.example.com/jd')
+    expect(vcard).toContain('TEL;TYPE=WORK,VOICE:+66 80 000 0000')
+    expect(vcard).toContain('EMAIL;TYPE=HOME:jd@example.com')
+    expect(vcard).not.toContain('Empty')
+  })
+
+  it('round-trips extras, keeping the link label', () => {
+    const parsed = parseVCard(buildVCard(withExtras, ['workPhone']))
+    // first work phone fills the fixed slot, the second becomes an extra
+    expect(parsed?.workPhone).toBe('+66 81 234 5678')
+    // personalEmail wasn't shared, so the personal email extra lands in that empty slot
+    expect(parsed?.personalEmail).toBe('jd@example.com')
+    expect(parsed?.extras).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: 'link', label: 'Portfolio', value: 'https://jagdeep.dev' }),
+        expect.objectContaining({ kind: 'link', label: 'My Blog' }),
+        expect.objectContaining({ kind: 'phone', scope: 'work', value: '+66 80 000 0000' }),
+      ]),
+    )
+    expect(parsed?.extras).toHaveLength(3)
+  })
+
+  it('keeps an unlabelled URL from another app as a website, not as LinkedIn', () => {
+    const parsed = parseVCard(['BEGIN:VCARD', 'FN:Meera Nair', 'URL:https://meera.dev', 'END:VCARD'].join('\r\n'))
+    expect(parsed?.linkedin).toBeUndefined()
+    expect(parsed?.extras).toEqual([expect.objectContaining({ kind: 'link', label: 'Website', value: 'https://meera.dev' })])
+  })
+})
+
 describe('parseVCard', () => {
   it('returns null for non-vCard text (so the scanner can say so)', () => {
     expect(parseVCard('just some random QR payload')).toBeNull()
