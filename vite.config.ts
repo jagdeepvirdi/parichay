@@ -13,7 +13,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       // The app lives under /app/; the landing page at / must not be controlled by the service worker.
       scope: '/app/',
-      includeAssets: ['favicon.svg'],
+      includeAssets: ['favicon.svg', 'logo-mark.png'],
       manifest: {
         name: 'Parichay | Contact Exchange',
         short_name: 'Parichay',

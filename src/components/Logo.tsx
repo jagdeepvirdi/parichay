@@ -1,18 +1,13 @@
-/** The small two-circle "meeting of two people" mark used next to the
- * wordmark on the Profile and Share screens. */
+/** The Parichay "P with two contact cards" mark. A transparent PNG kept in
+ * public/ and listed in the PWA `includeAssets` so it renders offline. */
 export function Logo({ size = 15 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 16 16" className="shrink-0" aria-hidden="true">
-      <circle cx="6" cy="8" r="5" fill="var(--color-accent)" />
-      <circle cx="10" cy="8" r="5" fill="var(--color-accent-warm)" opacity="0.82" />
-    </svg>
-  )
+  return <img src="/logo-mark.png" width={size} height={size} alt="" className="shrink-0" draggable={false} />
 }
 
 export function Wordmark() {
   return (
     <div className="flex items-center gap-2.5">
-      <Logo size={22} />
+      <Logo size={30} />
       <span className="font-display text-[20px] font-bold tracking-[-0.035em] text-ink">
         Parichay
       </span>

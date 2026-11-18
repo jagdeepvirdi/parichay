@@ -128,8 +128,8 @@ input, textarea, select { font-size: 16px; }
   .page-heading { align-items:flex-start; margin-bottom:1.4rem; }
   .page-heading h1 { font-size:1.8rem; }
   .page-heading p { font-size:.88rem; }
-  .dashboard-grid, .share-layout { grid-template-columns:1fr; }
-  .form-grid { grid-template-columns:1fr; }
+  /* minmax(0,1fr), not 1fr: a bare 1fr won't shrink below its content's min-width and overflows at 375px. */
+  .dashboard-grid, .share-layout, .form-grid { grid-template-columns:minmax(0,1fr); }
   .profile-savebar { position:sticky; bottom:0; padding:1rem 0 .6rem; background:linear-gradient(0deg,var(--color-bg) 75%,transparent); }
   .camera-surface { min-height:0; }
   .scan-frame { width:min(67vw,300px); }
