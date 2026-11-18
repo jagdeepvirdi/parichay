@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { buildVCard, parseVCard } from './vcard'
-import type { ProfileFields } from './profileFields'
+import { newExtra, type ProfileFields } from './profileFields'
 
 const profile: ProfileFields = {
   name: 'Jagdeep Virdi',
@@ -133,5 +133,36 @@ describe('parseVCard', () => {
     const folded = ['BEGIN:VCARD', 'VERSION:3.0', 'FN:Meera Nair', 'NOTE:Table 4\\, asked about\r\n  agentic billing demos', 'END:VCARD'].join('\r\n')
     const parsed = parseVCard(folded)
     expect(parsed?.note).toBe('Table 4, asked about agentic billing demos')
+  })
+})
+
+describe('social extras (several Instagrams)', () => {
+  const base: ProfileFields = {
+    name: 'Jagdeep Virdi',
+    instagram: 'jagdeep',
+    extras: [
+      newExtra('social', 'kitchen', 'Kitchen Instagram', '@jaggiskitchen', 'instagram'),
+      newExtra('social', 'work', 'Work Instagram', 'advancetech', 'instagram'),
+      newExtra('social', 'photo', 'Photo YouTube', 'jaggishots', 'youtube'),
+    ],
+  }
+
+  it('turns a bare handle into a URL for the chosen platform, keeping the label', () => {
+    const vcard = buildVCard(base, [])
+    expect(vcard).toContain('URL;TYPE=Kitchen-Instagram:https://instagram.com/jaggiskitchen')
+    expect(vcard).toContain('URL;TYPE=Work-Instagram:https://instagram.com/advancetech')
+    expect(vcard).toContain('URL;TYPE=Photo-YouTube:https://youtube.com/@jaggishots')
+  })
+
+  it('keeps a labelled Instagram out of the plain Instagram slot when read back', () => {
+    const onlyKitchen = buildVCard({ ...base, extras: base.extras!.slice(0, 1) }, [])
+    const parsed = parseVCard(onlyKitchen)
+    expect(parsed?.instagram).toBeUndefined()
+    expect(parsed?.extras).toEqual([expect.objectContaining({ label: 'Kitchen Instagram', value: 'https://instagram.com/jaggiskitchen' })])
+  })
+
+  it('still fills the plain slot for the fixed Instagram field', () => {
+    const parsed = parseVCard(buildVCard(base, ['instagram']))
+    expect(parsed?.instagram).toBe('https://instagram.com/jagdeep')
   })
 })

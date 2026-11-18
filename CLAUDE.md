@@ -37,9 +37,11 @@ src/
     *.test.ts
   db/             # Dexie schema (profile, groups, contacts)
   hooks/          # useProfile, useGroups, useContacts — thin Dexie wrappers
-  components/     # Avatar, BottomNav, FieldCard, Logo — presentational, reusable
+  components/     # Avatar, BottomNav, FieldCard, Logo, PageHeading — presentational, reusable
   features/
-    profile/      # "Your card" — build/edit the profile
+    dashboard/    # home screen at `/`: greeting, recent contacts, quick actions
+    settings/     # privacy/about info, reached from the top-bar gear
+    profile/      # "My card" at `/card` — build/edit the profile
     share/        # preset picker + QR
     scan/         # camera + jsQR + "card received" group-assign flow
     network/      # grouped, searchable list of collected contacts
@@ -55,12 +57,13 @@ src/
 5. **Dexie schema changes are new `db.version(n)` blocks** with an `upgrade` step if existing data needs reshaping. Never edit an existing version block in place.
 6. **Destructive actions need a confirmation.** Removing a contact is two taps (see `ContactDetailScreen`'s `confirmingDelete`), not one.
 7. **Social handles normalize, but don't assume a platform.** `normalizeUrl` in `vcard.ts` treats anything containing a `.` as already a full domain/path and anything else as a bare handle — keep that contract if you touch it, the round-trip test (`vcard.test.ts`) pins it down.
+8. **Sections group extras; presets key off `ExtraField.scope`.** `scope` is `'work'`, `'personal'` or a user-made `Section` id (stored in `ProfileRecord.sections`, no schema bump). Each section gets its own share preset via `presetsFor()`. Several Instagrams etc. are `kind: 'social'` extras with a `platform`; the vCard carries the label in `URL;TYPE=`, and `parseVCard` matches the fixed Instagram/LinkedIn/Twitter slots on the exact type so a labelled extra isn't swallowed into them.
 
 ## UI
 
-- Mobile-first, phone width is the only width that matters (this is not a desktop app).
-- Light theme only, matching the original design mockup's teal (`--color-accent`) / warm ochre (`--color-accent-warm`) palette — no dark-mode branch has been built; ask before adding one rather than bolting it on half-finished.
-- `IBM Plex Sans` / `IBM Plex Mono` throughout.
+- Mobile-first, but responsive: below 760px a bottom nav (`BottomNav`) is used; above it a sidebar (`AppShell`'s `SideNavigation`) with two-column grids, content capped at ~1040px. Keep phone width (~375px) the primary target and check it first.
+- Light theme only: cream background (`--color-bg` #FAF8F3), navy ink, teal accent (`--color-accent`); ochre (`--color-accent-warm`) is now a minor accent. Shared look lives in plain classes in `src/index.css` (`.page`, `.surface`, `.primary-button`, `.choice-chip`, …) — reuse them rather than re-inventing per screen. No dark-mode branch has been built; ask before adding one rather than bolting it on half-finished.
+- `Inter Variable` (body) and `Manrope Variable` (display headings), bundled via `@fontsource-variable` — never a runtime CDN. IBM Plex is still used by the landing page only.
 
 ## Known gaps / next steps (not yet built)
 

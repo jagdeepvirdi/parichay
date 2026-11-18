@@ -15,11 +15,11 @@ export default defineConfig({
       scope: '/app/',
       includeAssets: ['favicon.svg'],
       manifest: {
-        name: 'Parichay — Contact Exchange',
+        name: 'Parichay | Contact Exchange',
         short_name: 'Parichay',
         description: 'Share only what you choose, phone to phone, with no server in between.',
-        theme_color: '#2e6f64',
-        background_color: '#eef0ec',
+        theme_color: '#FAF8F3',
+        background_color: '#FAF8F3',
         display: 'standalone',
         id: '/app/',
         scope: '/app/',
@@ -41,8 +41,8 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        landing: resolve(__dirname, 'index.html'),
-        app: resolve(__dirname, 'app/index.html'),
+        landing: resolve(import.meta.dirname, 'index.html'),
+        app: resolve(import.meta.dirname, 'app/index.html'),
       },
     },
   },

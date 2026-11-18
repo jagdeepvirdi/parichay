@@ -11,9 +11,9 @@ export function Logo({ size = 15 }: { size?: number }) {
 
 export function Wordmark() {
   return (
-    <div className="flex items-center gap-1.5">
-      <Logo />
-      <span className="font-mono text-[10.5px] font-semibold uppercase tracking-wider text-accent">
+    <div className="flex items-center gap-2.5">
+      <Logo size={22} />
+      <span className="font-display text-[20px] font-bold tracking-[-0.035em] text-ink">
         Parichay
       </span>
     </div>

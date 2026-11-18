@@ -1,42 +1,26 @@
 import { useState } from 'react'
-import { EXTRA_KIND_LABELS, type ExtraKind } from '../../lib/profileFields'
+import { Plus, X } from 'lucide-react'
+import { EXTRA_KIND_LABELS, SOCIAL_PLATFORMS, type ExtraKind, type SocialPlatform } from '../../lib/profileFields'
 
-const KINDS: ExtraKind[] = ['phone', 'email', 'link']
+const KINDS: ExtraKind[] = ['phone', 'email', 'link', 'social']
 
-/** "+ Add field" that expands inline into a Phone / Email / Website picker. */
-export function AddFieldMenu({ onAdd }: { onAdd: (kind: ExtraKind) => void }) {
+export function AddFieldMenu({ onAdd }: { onAdd: (kind: ExtraKind, platform?: SocialPlatform) => void }) {
   const [open, setOpen] = useState(false)
+  const [pickingPlatform, setPickingPlatform] = useState(false)
+  const close = () => { setOpen(false); setPickingPlatform(false) }
 
-  if (!open) {
-    return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="self-start py-1 font-mono text-[11.5px] font-medium text-ink-dim"
-      >
-        + Add field
-      </button>
-    )
-  }
+  if (!open) return <button type="button" onClick={() => setOpen(true)} className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-accent"><Plus size={16} />Add field</button>
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      {KINDS.map((kind) => (
-        <button
-          key={kind}
-          type="button"
-          onClick={() => {
-            onAdd(kind)
-            setOpen(false)
-          }}
-          className="rounded-full border border-line bg-surface px-3 py-1.75 font-mono text-[11px] text-ink"
-        >
-          {EXTRA_KIND_LABELS[kind]}
-        </button>
-      ))}
-      <button type="button" onClick={() => setOpen(false)} className="px-1 font-mono text-[11px] text-ink-dim">
-        Cancel
-      </button>
+    <div className="mt-3 flex flex-wrap items-center gap-2">
+      {pickingPlatform
+        ? (Object.keys(SOCIAL_PLATFORMS) as SocialPlatform[]).map((platform) => (
+            <button key={platform} type="button" onClick={() => { onAdd('social', platform); close() }} className="secondary-button min-h-9 px-3 py-1 text-sm">{SOCIAL_PLATFORMS[platform].label}</button>
+          ))
+        : KINDS.map((kind) => (
+            <button key={kind} type="button" onClick={() => { if (kind === 'social') setPickingPlatform(true); else { onAdd(kind); close() } }} className="secondary-button min-h-9 px-3 py-1 text-sm">{EXTRA_KIND_LABELS[kind]}</button>
+          ))}
+      <button type="button" onClick={close} aria-label="Cancel adding field" className="grid h-9 w-9 place-items-center rounded-lg text-ink-dim"><X size={16} /></button>
     </div>
   )
 }

@@ -5,33 +5,14 @@ function initials(name: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
 }
 
-const SIZE_CLASSES = {
-  sm: 'h-10 w-10 text-[13px]',
-  md: 'h-14 w-14 text-[17px]',
-  lg: 'h-15 w-15 text-[19px]',
-} as const
+const SIZES = { sm: 40, md: 52, lg: 64 } as const
 
-export function Avatar({
-  name,
-  tone = 'accent',
-  size = 'md',
-}: {
-  name: string
-  tone?: 'accent' | 'warm' | 'dim'
-  size?: keyof typeof SIZE_CLASSES
-}) {
-  const gradient =
-    tone === 'warm'
-      ? 'linear-gradient(135deg, var(--color-accent-warm), var(--color-accent-warm-deep))'
-      : tone === 'dim'
-        ? 'linear-gradient(135deg, var(--color-ink-dim), #3d4a44)'
-        : 'linear-gradient(135deg, var(--color-accent), var(--color-accent-deep))'
-
+export function Avatar({ name, tone = 'accent', size = 'md' }: { name: string; tone?: 'accent' | 'warm' | 'dim'; size?: keyof typeof SIZES }) {
+  const color = tone === 'warm' ? '#FAF8F3' : tone === 'dim' ? '#EDF0F2' : '#DCECE7'
+  const ink = tone === 'warm' ? '#10263A' : tone === 'dim' ? '#516171' : '#167C70'
+  const dimension = SIZES[size]
   return (
-    <div
-      className={`shadow-btn flex shrink-0 items-center justify-center rounded-full font-semibold text-white ${SIZE_CLASSES[size]}`}
-      style={{ background: gradient }}
-    >
+    <div role="img" aria-label={`${name || 'Contact'} initials ${initials(name || '?')}`} className="flex shrink-0 items-center justify-center rounded-full font-semibold" style={{ width: dimension, height: dimension, background: color, color: ink, fontSize: dimension * .27 }}>
       {initials(name)}
     </div>
   )

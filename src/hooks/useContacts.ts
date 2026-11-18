@@ -6,7 +6,10 @@ export function useContacts() {
 }
 
 export function useContact(id: number | undefined) {
-  return useLiveQuery(() => (id === undefined ? undefined : db.contacts.get(id)), [id])
+  return useLiveQuery(async () => {
+    if (id === undefined) return null
+    return (await db.contacts.get(id)) ?? null
+  }, [id])
 }
 
 export async function saveContact(contact: Omit<ContactRecord, 'id'>): Promise<number> {

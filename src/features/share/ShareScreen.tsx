@@ -1,44 +1,49 @@
 import { useEffect, useMemo, useState } from 'react'
 import QRCode from 'qrcode'
 import { useProfile } from '../../hooks/useProfile'
-import { Wordmark } from '../../components/Logo'
-import { SHARE_PRESETS, type PresetKey } from '../../lib/presets'
+import { Avatar } from '../../components/Avatar'
+import { PageHeading } from '../../components/PageHeading'
+import { presetsFor, type PresetKey } from '../../lib/presets'
 import { buildVCard } from '../../lib/vcard'
 import { FIELD_KEYS, FIELD_LABELS, PHONE_FIELDS, type FieldKey } from '../../lib/profileFields'
 
 export function ShareScreen() {
   const { profile } = useProfile()
   const [presetKey, setPresetKey] = useState<PresetKey>('professional')
-  // null = follow the preset. Once the user taps a field this holds their own
-  // pick (ids: a FieldKey, or an extra's id) and the preset is no longer applied.
   const [custom, setCustom] = useState<Set<string> | null>(null)
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
+  const [qrFailed, setQrFailed] = useState(false)
+  const presets = useMemo(() => presetsFor(profile.sections), [profile.sections])
+  // If the chosen section was since removed, fall back to the first preset.
+  const preset = presets.find((item) => item.key === presetKey) ?? presets[0]
 
-  const preset = SHARE_PRESETS.find((p) => p.key === presetKey)!
-
-  // Everything that *could* be shared. The "include phone numbers" toggle is a
-  // blanket override applied here, so it beats presets and custom picks alike.
   const effectiveFields = useMemo(() => {
-    const keys = FIELD_KEYS.filter((f) => !!profile[f] && (profile.includePhones || !PHONE_FIELDS.includes(f)))
-    const extras = (profile.extras ?? []).filter(
-      (x) => x.value.trim() && (profile.includePhones || x.kind !== 'phone'),
-    )
+    const keys = FIELD_KEYS.filter((field) => !!profile[field] && (profile.includePhones || !PHONE_FIELDS.includes(field)))
+    const extras = (profile.extras ?? []).filter((item) => item.value.trim() && (profile.includePhones || item.kind !== 'phone'))
     return { keys, extras }
   }, [profile])
 
-  const selected = useMemo(() => {
-    if (custom) return custom
-    return new Set<string>([
-      ...effectiveFields.keys.filter((k) => preset.fields.includes(k)),
-      ...effectiveFields.extras.filter((x) => preset.includesExtra(x)).map((x) => x.id),
-    ])
-  }, [custom, preset, effectiveFields])
+  const selected = useMemo(() => custom ?? new Set<string>([
+    ...effectiveFields.keys.filter((key) => preset.fields.includes(key)),
+    ...effectiveFields.extras.filter(preset.includesExtra).map((item) => item.id),
+  ]), [custom, preset, effectiveFields])
 
   const chips = [
-    ...effectiveFields.keys.map((k) => ({ id: k as string, label: FIELD_LABELS[k as FieldKey] })),
-    ...effectiveFields.extras.map((x) => ({ id: x.id, label: x.label || 'Field' })),
+    ...effectiveFields.keys.map((key) => ({ id: key as string, label: FIELD_LABELS[key as FieldKey] })),
+    ...effectiveFields.extras.map((item) => ({ id: item.id, label: item.label || 'Field' })),
   ]
-  const selectedCount = chips.filter((c) => selected.has(c.id)).length
+  const selectedCount = chips.filter((item) => selected.has(item.id)).length
+
+  useEffect(() => {
+    if (!profile.name) return
+    const shared = { ...profile, extras: effectiveFields.extras.filter((item) => selected.has(item.id)) }
+    const vcard = buildVCard(shared, effectiveFields.keys.filter((key) => selected.has(key)))
+    let cancelled = false
+    QRCode.toDataURL(vcard, { margin: 1, width: 480, color: { dark: '#10263A', light: '#FFFFFF' } })
+      .then((url) => { if (!cancelled) { setQrDataUrl(url); setQrFailed(false) } })
+      .catch(() => { if (!cancelled) { setQrDataUrl(null); setQrFailed(true) } })
+    return () => { cancelled = true }
+  }, [profile, effectiveFields, selected])
 
   const toggle = (id: string) => {
     const next = new Set(selected)
@@ -47,117 +52,46 @@ export function ShareScreen() {
     setCustom(next)
   }
 
-  useEffect(() => {
-    if (!profile.name) return
-    const shared = {
-      ...profile,
-      extras: effectiveFields.extras.filter((x) => selected.has(x.id)),
-    }
-    const vcard = buildVCard(
-      shared,
-      effectiveFields.keys.filter((k) => selected.has(k)),
-    )
-    let cancelled = false
-    QRCode.toDataURL(vcard, {
-      margin: 1,
-      width: 480,
-      color: { dark: '#16231f', light: '#ffffff' },
-    }).then((url) => {
-      if (!cancelled) setQrDataUrl(url)
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [profile, effectiveFields, selected])
-
   return (
-    <div className="flex h-full flex-col">
-      <header className="flex shrink-0 flex-col gap-1.5 px-6 pt-4 pb-3.5">
-        <Wordmark />
-        <h1 className="text-[22px] font-bold">Share your card</h1>
-      </header>
-
-      <div className="flex flex-1 flex-col items-center gap-4.5 overflow-y-auto px-6 pb-4">
-        <div className="flex flex-wrap justify-center gap-2">
-          {SHARE_PRESETS.map((p) => {
-            const active = !custom && p.key === presetKey
-            return (
-              <button
-                key={p.key}
-                type="button"
-                onClick={() => {
-                  setPresetKey(p.key)
-                  setCustom(null)
-                }}
-                className={`rounded-full border px-3 py-1.75 font-mono text-[11px] whitespace-nowrap transition-shadow ${active ? 'shadow-btn' : ''}`}
-                style={{
-                  background: active ? 'var(--color-accent)' : 'transparent',
-                  color: active ? '#fff' : 'var(--color-ink-dim)',
-                  borderColor: active ? 'var(--color-accent)' : 'var(--color-line)',
-                }}
-              >
-                {p.label}
-              </button>
-            )
-          })}
-          {custom && (
-            <span
-              className="shadow-btn rounded-full border px-3 py-1.75 font-mono text-[11px] whitespace-nowrap"
-              style={{ background: 'var(--color-accent-warm)', color: '#fff', borderColor: 'var(--color-accent-warm)' }}
-            >
-              Custom
-            </span>
-          )}
-        </div>
-
-        <div className="shadow-card flex items-center justify-center rounded-3xl border border-line bg-white p-4.5">
-          {profile.name && qrDataUrl ? (
-            <img src={qrDataUrl} alt="Scannable QR code of your shared card" className="h-55 w-55" />
-          ) : (
-            <div className="flex h-55 w-55 flex-col items-center justify-center gap-2 text-center text-[13px] text-ink-dim">
-              Add your name on the Profile tab to generate a card.
-            </div>
-          )}
-        </div>
-
-        <div className="text-center">
-          <div className="text-[14px] font-semibold">
-            {custom ? 'Custom' : preset.label} card · {selectedCount} field{selectedCount === 1 ? '' : 's'}
+    <div className="page">
+      <PageHeading title="Share my card" description="Choose what to send. Your QR code is generated on this device and works without a connection." />
+      <div className="share-layout">
+        <section className="surface shadow-card qr-panel">
+          <div className="mb-4 flex items-center gap-3 self-start text-left">
+            <Avatar name={profile.name || 'You'} size="sm" />
+            <div className="min-w-0"><div className="truncate font-semibold">{profile.name || 'Your card'}</div><div className="truncate text-sm text-ink-dim">{profile.title || profile.company || 'Private contact card'}</div></div>
           </div>
-          <div className="mt-0.5 text-[12px] text-ink-dim">No signal needed — this works offline.</div>
-        </div>
+          <div className="flex min-h-[280px] w-full items-center justify-center rounded-xl border border-line bg-white p-3">
+            {profile.name && qrDataUrl ? <img src={qrDataUrl} alt="Scannable QR code of your shared card" className="qr-image" /> : <div className="max-w-[220px] px-4 text-sm leading-6 text-ink-dim">{!profile.name ? 'Add your name to My card to create a QR code.' : qrFailed ? 'Could not create a QR code. Try selecting fewer details.' : 'Preparing your QR code…'}</div>}
+          </div>
+          <div className="mt-4 text-sm font-semibold">{custom ? 'Custom' : preset.label} card · {selectedCount} {selectedCount === 1 ? 'detail' : 'details'}</div>
+          <div className="mt-1 text-xs text-ink-dim">The QR code stays on this device.</div>
+        </section>
 
-        {chips.length > 0 && (
-          <div className="flex w-full flex-col items-center gap-2">
-            <div className="text-[12px] text-ink-dim">Tap a field to include it or leave it out.</div>
-            <div className="flex max-w-80 flex-wrap justify-center gap-1.5">
-              {chips.map((c) => {
-                const on = selected.has(c.id)
-                return (
-                  <button
-                    key={c.id}
-                    type="button"
-                    aria-pressed={on}
-                    onClick={() => toggle(c.id)}
-                    className="rounded-full border px-2.5 py-1.5 font-mono text-[10.5px]"
-                    style={{
-                      background: on ? 'rgba(46,111,100,0.1)' : 'transparent',
-                      color: on ? 'var(--color-accent)' : 'var(--color-ink-dim)',
-                      borderColor: on ? 'var(--color-accent)' : 'var(--color-line)',
-                      textDecoration: on ? 'none' : 'line-through',
-                    }}
-                  >
-                    {on ? '✓ ' : ''}
-                    {c.label}
-                  </button>
-                )
+        <div className="section-stack">
+          <section className="surface surface-pad">
+            <h2 className="surface-title">Choose a preset</h2>
+            <p className="surface-copy mb-4 mt-1 text-sm">Start with a selection, then adjust each detail below.</p>
+            <div className="flex flex-wrap gap-2">
+              {presets.map((item) => {
+                const active = !custom && item.key === presetKey
+                return <button key={item.key} type="button" aria-pressed={active} onClick={() => { setPresetKey(item.key); setCustom(null) }} className="choice-chip" aria-label={`${item.label} preset`} style={active ? { borderColor: 'var(--color-accent)', background: 'var(--color-accent)', color: '#fff' } : undefined}>{item.label}</button>
               })}
+              {custom && <span className="choice-chip border-accent bg-[#E8F2EE] text-accent">Custom</span>}
             </div>
-            {!profile.includePhones && (
-              <div className="text-[11.5px] text-ink-dim">Phone numbers are hidden — turned off on Your card.</div>
-            )}
-          </div>
-        )}
+          </section>
+
+          <section className="surface surface-pad">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="surface-title">Included details</h2><span className="text-xs text-ink-dim">Tap to change</span>
+            </div>
+            {chips.length ? <div className="mt-4 flex flex-wrap gap-2">
+              {chips.map((item) => <button key={item.id} type="button" aria-pressed={selected.has(item.id)} onClick={() => toggle(item.id)} className="choice-chip">{item.label}</button>)}
+            </div> : <p className="surface-copy mb-0 mt-3 text-sm">Add details to My card to choose what to include.</p>}
+            {!profile.includePhones && <p className="mb-0 mt-4 border-t border-line pt-3 text-sm text-ink-dim">Phone numbers are hidden by your My card privacy setting.</p>}
+          </section>
+          <p className="m-0 px-1 text-xs leading-5 text-ink-dim">Only the selected details are encoded. No information is sent to a server.</p>
+        </div>
       </div>
     </div>
   )

@@ -8,7 +8,9 @@ const EMPTY_PROFILE: ProfileRecord = {
 }
 
 export function useProfile() {
-  const profile = useLiveQuery(() => db.profile.get(PROFILE_ID), [])
+  const result = useLiveQuery(() => db.profile.get(PROFILE_ID).then((record) => record ?? EMPTY_PROFILE), [], 'loading' as const)
+  const loading = result === 'loading'
+  const profile = loading ? EMPTY_PROFILE : result
 
   const save = async (fields: Partial<ProfileRecord>) => {
     const current = (await db.profile.get(PROFILE_ID)) ?? EMPTY_PROFILE
@@ -16,8 +18,8 @@ export function useProfile() {
   }
 
   return {
-    profile: profile ?? EMPTY_PROFILE,
-    loading: profile === undefined,
+    profile,
+    loading,
     save,
   }
 }
