@@ -1,9 +1,11 @@
 import Dexie, { type EntityTable } from 'dexie'
-import type { ProfileFields } from '../lib/profileFields'
+import type { ProfileFields, Section } from '../lib/profileFields'
 
 export interface ProfileRecord extends ProfileFields {
   id: 'me'
   includePhones: boolean
+  /** User-made sections (e.g. "Kitchen"). Stored inside the profile record, so no schema bump. */
+  sections?: Section[]
 }
 
 export interface GroupRecord {

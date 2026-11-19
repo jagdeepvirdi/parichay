@@ -1,4 +1,12 @@
-import { newExtra, type ExtraKind, type ExtraScope, type FieldKey, type ProfileFields } from './profileFields'
+import {
+  newExtra,
+  SOCIAL_PLATFORMS,
+  WORK_SCOPE,
+  type ExtraKind,
+  type ExtraScope,
+  type FieldKey,
+  type ProfileFields,
+} from './profileFields'
 
 // A tiny, deliberately narrow VCARD 3.0 reader/writer. It only knows about
 // the fields Parichay itself cares about, so it is not a general vCard
@@ -58,11 +66,15 @@ export function buildVCard(profile: ProfileFields, fields: FieldKey[], note?: st
   for (const extra of profile.extras ?? []) {
     const value = extra.value.trim()
     if (!value) continue
-    const work = extra.scope === 'work'
+    // Anything that isn't Professional (Personal or a hobby section) is exported as personal.
+    const work = extra.scope === WORK_SCOPE
     if (extra.kind === 'phone') {
       lines.push(`TEL;TYPE=${work ? 'WORK,VOICE' : 'CELL'}:${escapeText(value)}`)
     } else if (extra.kind === 'email') {
       lines.push(`EMAIL;TYPE=${work ? 'WORK' : 'HOME'}:${escapeText(value)}`)
+    } else if (extra.kind === 'social') {
+      const url = normalizeUrl(value, SOCIAL_PLATFORMS[extra.platform ?? 'instagram'].prefix)
+      lines.push(`URL;TYPE=${typeFromLabel(extra.label)}:${escapeText(url)}`)
     } else {
       const url = value.includes('.') || /^https?:\/\//i.test(value) ? normalizeUrl(value, '') : value
       lines.push(`URL;TYPE=${typeFromLabel(extra.label)}:${escapeText(url)}`)
@@ -158,9 +170,11 @@ export function parseVCard(text: string): ParsedVCard | null {
         break
       }
       case 'URL':
-        if (type.includes('LINKEDIN') && !result.linkedin) result.linkedin = rawValue
-        else if (type.includes('INSTAGRAM') && !result.instagram) result.instagram = rawValue
-        else if (type.includes('TWITTER') && !result.twitter) result.twitter = rawValue
+        // Exact match, so a labelled extra like "Kitchen-Instagram" keeps its
+        // label as an extra instead of landing in the plain Instagram slot.
+        if (type === 'LINKEDIN' && !result.linkedin) result.linkedin = rawValue
+        else if (type === 'INSTAGRAM' && !result.instagram) result.instagram = rawValue
+        else if (type === 'TWITTER' && !result.twitter) result.twitter = rawValue
         else addExtra('link', 'work', labelFromType(typeParam), rawValue)
         break
       case 'NOTE':
