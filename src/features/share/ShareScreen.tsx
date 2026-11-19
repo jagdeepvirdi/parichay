@@ -1,8 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import QRCode from 'qrcode'
 import { useProfile } from '../../hooks/useProfile'
-import { Avatar } from '../../components/Avatar'
-import { PageHeading } from '../../components/PageHeading'
 import { presetsFor, type PresetKey } from '../../lib/presets'
 import { buildVCard } from '../../lib/vcard'
 import { FIELD_KEYS, FIELD_LABELS, PHONE_FIELDS, type FieldKey } from '../../lib/profileFields'
@@ -32,7 +30,6 @@ export function ShareScreen() {
     ...effectiveFields.keys.map((key) => ({ id: key as string, label: FIELD_LABELS[key as FieldKey] })),
     ...effectiveFields.extras.map((item) => ({ id: item.id, label: item.label || 'Field' })),
   ]
-  const selectedCount = chips.filter((item) => selected.has(item.id)).length
 
   useEffect(() => {
     if (!profile.name) return
@@ -54,7 +51,6 @@ export function ShareScreen() {
 
   return (
     <div className="page">
-      <PageHeading title="Share my card" description="Choose what to send. Your QR code is generated on this device and works without a connection." />
       <div className="preset-bar" role="group" aria-label="Choose a card to share">
         {presets.map((item) => {
           const active = !custom && item.key === presetKey
@@ -64,15 +60,9 @@ export function ShareScreen() {
       </div>
       <div className="share-layout">
         <section className="surface shadow-card qr-panel">
-          <div className="mb-4 flex items-center gap-3 self-start text-left">
-            <Avatar name={profile.name || 'You'} size="sm" />
-            <div className="min-w-0"><div className="truncate font-semibold">{profile.name || 'Your card'}</div><div className="truncate text-sm text-ink-dim">{profile.title || profile.company || 'Private contact card'}</div></div>
-          </div>
           <div className="flex min-h-[280px] w-full items-center justify-center rounded-xl border border-line bg-white p-3">
             {profile.name && qrDataUrl ? <img src={qrDataUrl} alt="Scannable QR code of your shared card" className="qr-image" /> : <div className="max-w-[220px] px-4 text-sm leading-6 text-ink-dim">{!profile.name ? 'Add your name to My card to create a QR code.' : qrFailed ? 'Could not create a QR code. Try selecting fewer details.' : 'Preparing your QR code…'}</div>}
           </div>
-          <div className="mt-4 text-sm font-semibold">{custom ? 'Custom' : preset.label} card · {selectedCount} {selectedCount === 1 ? 'detail' : 'details'}</div>
-          <div className="mt-1 text-xs text-ink-dim">The QR code stays on this device.</div>
         </section>
 
         <div className="section-stack">
@@ -85,7 +75,6 @@ export function ShareScreen() {
             </div> : <p className="surface-copy mb-0 mt-3 text-sm">Add details to My card to choose what to include.</p>}
             {!profile.includePhones && <p className="mb-0 mt-4 border-t border-line pt-3 text-sm text-ink-dim">Phone numbers are hidden by your My card privacy setting.</p>}
           </section>
-          <p className="m-0 px-1 text-xs leading-5 text-ink-dim">Only the selected details are encoded. No information is sent to a server.</p>
         </div>
       </div>
     </div>
