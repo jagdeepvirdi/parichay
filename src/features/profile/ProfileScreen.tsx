@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ChangeEvent } from 'react'
 import { Plus } from 'lucide-react'
 import { useProfile } from '../../hooks/useProfile'
 import type { ProfileRecord } from '../../db/db'
 import { Avatar } from '../../components/Avatar'
 import { PageHeading } from '../../components/PageHeading'
 import { newExtra, newSection, PERSONAL_SCOPE, WORK_SCOPE, type ExtraField, type ExtraKind, type ExtraScope, type FieldKey, type SocialPlatform } from '../../lib/profileFields'
+import { resizePhoto } from './resizePhoto'
 import { FieldInput } from './FieldInput'
 import { ExtraFieldInput } from './ExtraFieldInput'
 import { AddFieldMenu } from './AddFieldMenu'
@@ -21,6 +22,8 @@ export function ProfileScreen() {
   const [justSaved, setJustSaved] = useState(false)
   const [activeTabId, setActiveTabId] = useState<string>(WORK_SCOPE)
   const [addingSection, setAddingSection] = useState(false)
+  const [photoError, setPhotoError] = useState(false)
+  const photoInput = useRef<HTMLInputElement>(null)
   const savedTimer = useRef<number | undefined>(undefined)
   const setDraft = (next: ProfileRecord | null) => { writePendingDraft(next); setDraftState(next) }
   const shown = draft ?? profile
@@ -36,6 +39,17 @@ export function ProfileScreen() {
   if (loading) return <div className="page" aria-busy="true" />
 
   const update = (fields: Partial<ProfileRecord>) => setDraft({ ...shown, ...fields })
+  const handlePhoto = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    try {
+      update({ photo: await resizePhoto(file) })
+      setPhotoError(false)
+    } catch {
+      setPhotoError(true)
+    }
+  }
   const setField = (key: FieldKey) => (value: string) => update({ [key]: value })
   const extras = shown.extras ?? []
   const updateExtra = (next: ExtraField) => update({ extras: extras.map((item) => item.id === next.id ? next : item) })
@@ -82,12 +96,21 @@ export function ProfileScreen() {
       <PageHeading title="My card" description="Keep your details current. Choose what to share whenever you meet someone." />
       <div className="section-stack">
         <section className="profile-hero">
-          <Avatar name={shown.name || 'You'} size="lg" />
+          <div className="flex shrink-0 flex-col items-center gap-1">
+            <button type="button" onClick={() => photoInput.current?.click()} aria-label={shown.photo ? 'Change your photo' : 'Add your photo'} className="rounded-full border-0 bg-transparent p-0">
+              <Avatar name={shown.name || 'You'} size="lg" photo={shown.photo} />
+            </button>
+            <input ref={photoInput} type="file" accept="image/*" hidden aria-label="Choose a photo" onChange={handlePhoto} />
+            {shown.photo
+              ? <button type="button" onClick={() => update({ photo: undefined })} className="border-0 bg-transparent p-0 text-xs text-white/70 underline">Remove</button>
+              : <button type="button" onClick={() => photoInput.current?.click()} className="border-0 bg-transparent p-0 text-xs text-white/70 underline">Add photo</button>}
+          </div>
           <div className="min-w-0 flex-1">
             <input aria-label="Your name" className="block w-full border-0 bg-transparent text-xl font-semibold outline-none placeholder:text-white/55" value={shown.name} placeholder="Your name" onChange={(event) => update({ name: event.target.value })} />
             <input aria-label="Your title" className="mt-1 block w-full border-0 bg-transparent text-sm outline-none placeholder:text-white/60" value={shown.title ?? ''} placeholder="Your title" onChange={(event) => update({ title: event.target.value })} />
           </div>
         </section>
+        <p className="surface-copy -mt-2 mb-0 text-sm" role={photoError ? 'alert' : undefined}>{photoError ? 'Could not use that image. Try a different photo.' : 'Your photo stays on this device. It is never included in the QR code.'}</p>
 
         <div className="preset-bar !mb-0" role="group" aria-label="Choose a card to edit">
           {tabs.map((tab) => (

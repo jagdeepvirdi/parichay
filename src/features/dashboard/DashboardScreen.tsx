@@ -20,7 +20,7 @@ export function DashboardScreen() {
       <div className="dashboard-grid">
         <div className="section-stack">
           <section className="profile-hero">
-            <Avatar name={profile.name || 'You'} size="lg" />
+            <Avatar name={profile.name || 'You'} size="lg" photo={profile.photo} />
             <div className="min-w-0 flex-1">
               <div className="text-lg font-semibold">{profile.name || 'Your name'}</div>
               <div className="mt-1 truncate text-sm text-white/70">{[profile.title, profile.company].filter(Boolean).join(' · ') || 'Your professional introduction'}</div>

@@ -7,10 +7,13 @@ function initials(name: string): string {
 
 const SIZES = { sm: 40, md: 52, lg: 64 } as const
 
-export function Avatar({ name, tone = 'accent', size = 'md' }: { name: string; tone?: 'accent' | 'warm' | 'dim'; size?: keyof typeof SIZES }) {
+export function Avatar({ name, tone = 'accent', size = 'md', photo }: { name: string; tone?: 'accent' | 'warm' | 'dim'; size?: keyof typeof SIZES; photo?: string }) {
   const color = tone === 'warm' ? '#FAF8F3' : tone === 'dim' ? '#EDF0F2' : '#DCECE7'
   const ink = tone === 'warm' ? '#10263A' : tone === 'dim' ? '#516171' : '#167C70'
   const dimension = SIZES[size]
+  if (photo) {
+    return <img src={photo} alt={`${name || 'Your'} photo`} className="shrink-0 rounded-full object-cover" style={{ width: dimension, height: dimension }} />
+  }
   return (
     <div role="img" aria-label={`${name || 'Contact'} initials ${initials(name || '?')}`} className="flex shrink-0 items-center justify-center rounded-full font-semibold" style={{ width: dimension, height: dimension, background: color, color: ink, fontSize: dimension * .27 }}>
       {initials(name)}

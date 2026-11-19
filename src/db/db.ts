@@ -6,6 +6,8 @@ export interface ProfileRecord extends ProfileFields {
   includePhones: boolean
   /** User-made sections (e.g. "Kitchen"). Stored inside the profile record, so no schema bump. */
   sections?: Section[]
+  /** Small JPEG data URL of the user's own photo. Local only: never part of the vCard/QR. No schema bump (not indexed). */
+  photo?: string
 }
 
 export interface GroupRecord {
