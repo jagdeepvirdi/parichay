@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ArrowRight, BookUser, QrCode, ScanLine } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { useProfile } from '../../hooks/useProfile'
 import { useContacts } from '../../hooks/useContacts'
 import { useGroups } from '../../hooks/useGroups'
@@ -26,6 +26,14 @@ export function DashboardScreen() {
               <div className="mt-1 truncate text-sm text-white/70">{[profile.title, profile.company].filter(Boolean).join(' · ') || 'Your professional introduction'}</div>
             </div>
             <Link to="/card" aria-label="Edit my card" className="icon-button"><ArrowRight size={19} /></Link>
+          </section>
+
+          <section className="surface surface-pad">
+            <p className="eyebrow">Your local network</p>
+            <div className="grid grid-cols-2 gap-4">
+              <div><div className="font-display text-3xl font-bold tracking-tight">{contacts.length}</div><div className="mt-1 text-sm text-ink-dim">{contacts.length === 1 ? 'contact' : 'contacts'}</div></div>
+              <div><div className="font-display text-3xl font-bold tracking-tight">{groups.length}</div><div className="mt-1 text-sm text-ink-dim">{groups.length === 1 ? 'group' : 'groups'}</div></div>
+            </div>
           </section>
 
           {!loading && !profileReady && (
@@ -61,22 +69,6 @@ export function DashboardScreen() {
         </div>
 
         <div className="section-stack">
-          <section className="surface surface-pad">
-            <p className="eyebrow">Your local network</p>
-            <div className="grid grid-cols-2 gap-4">
-              <div><div className="font-display text-3xl font-bold tracking-tight">{contacts.length}</div><div className="mt-1 text-sm text-ink-dim">{contacts.length === 1 ? 'contact' : 'contacts'}</div></div>
-              <div><div className="font-display text-3xl font-bold tracking-tight">{groups.length}</div><div className="mt-1 text-sm text-ink-dim">{groups.length === 1 ? 'group' : 'groups'}</div></div>
-            </div>
-          </section>
-          <section className="surface surface-pad">
-            <h2 className="surface-title mb-3">Quick actions</h2>
-            <div className="quick-grid">
-              <Link className="quick-link" to="/share"><QrCode size={19} />Share my card</Link>
-              <Link className="quick-link" to="/scan"><ScanLine size={19} />Scan a card</Link>
-              <Link className="quick-link" to="/card"><BookUser size={19} />Edit my card</Link>
-              <Link className="quick-link" to="/network"><ArrowRight size={19} />Browse network</Link>
-            </div>
-          </section>
           <p className="m-0 px-1 text-xs leading-5 text-ink-dim">Private by design. Your profile and contacts are stored in this browser and stay available offline.</p>
         </div>
       </div>

@@ -55,6 +55,13 @@ export function ShareScreen() {
   return (
     <div className="page">
       <PageHeading title="Share my card" description="Choose what to send. Your QR code is generated on this device and works without a connection." />
+      <div className="preset-bar" role="group" aria-label="Choose a card to share">
+        {presets.map((item) => {
+          const active = !custom && item.key === presetKey
+          return <button key={item.key} type="button" aria-pressed={active} onClick={() => { setPresetKey(item.key); setCustom(null) }} className="choice-chip shrink-0" aria-label={`${item.label} preset`} style={active ? { borderColor: 'var(--color-accent)', background: 'var(--color-accent)', color: '#fff' } : undefined}>{item.label}</button>
+        })}
+        {custom && <span className="choice-chip shrink-0 border-accent bg-[#E8F2EE] text-accent">Custom</span>}
+      </div>
       <div className="share-layout">
         <section className="surface shadow-card qr-panel">
           <div className="mb-4 flex items-center gap-3 self-start text-left">
@@ -69,18 +76,6 @@ export function ShareScreen() {
         </section>
 
         <div className="section-stack">
-          <section className="surface surface-pad">
-            <h2 className="surface-title">Choose a preset</h2>
-            <p className="surface-copy mb-4 mt-1 text-sm">Start with a selection, then adjust each detail below.</p>
-            <div className="flex flex-wrap gap-2">
-              {presets.map((item) => {
-                const active = !custom && item.key === presetKey
-                return <button key={item.key} type="button" aria-pressed={active} onClick={() => { setPresetKey(item.key); setCustom(null) }} className="choice-chip" aria-label={`${item.label} preset`} style={active ? { borderColor: 'var(--color-accent)', background: 'var(--color-accent)', color: '#fff' } : undefined}>{item.label}</button>
-              })}
-              {custom && <span className="choice-chip border-accent bg-[#E8F2EE] text-accent">Custom</span>}
-            </div>
-          </section>
-
           <section className="surface surface-pad">
             <div className="flex items-center justify-between gap-3">
               <h2 className="surface-title">Included details</h2><span className="text-xs text-ink-dim">Tap to change</span>
